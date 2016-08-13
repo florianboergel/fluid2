@@ -138,3 +138,74 @@ xlabel('f (Hz)')
 ylabel('Power spectral density')
 xlim([0 size(f_atmo_fluc,2)])
 
+%% Statistics
+[x,y] = ksdensity(fluc_atmo);
+%% Correlation
+%integral length
+timeLags = 12500;
+autocorr_time_lag = (1-1:timeLags)';
+autocorr_data = autocorr(fluc_atmo,timeLags);
+
+% check fft of autocorr
+autocorr_fft = fft(autocorr_data);
+figure
+plot(abs(autocorr_fft(1:length(autocorr_fft)/2+1)));
+%delete data lower than 0 of the autocorrelation (visually dicided)
+i = 1
+while autocorr_data(i,1) > 0
+    i = i + 1
+end
+autocorr_time_lag(i:end) = [];
+autocorr_data(i:end) = [];
+figure
+plot(autocorr_data);
+%% Joint probability dist
+xlag = lagmatrix(fluc_atmo,[0 1 2 3 4 5 6 7 8 9 10]);
+
+x_axis = -3:.2:3; % Define edges of bins for x axis. Column vector
+y_axis = -3:.2:3; % Same for y axis
+
+%// Compute and plot pdf
+figure
+histogram2(xlag(:,1), xlag(:,2), x_axis, y_axis, 'Normalization', 'pdf')
+
+%// Compute and plot pdf
+figure
+histogram2(xlag(:,1), xlag(:,10), x_axis, y_axis, 'Normalization', 'pdf')
+
+%// Compute and plot cdf
+figure
+histogram2(xlag(:,1), xlag(:,2), x_axis, y_axis, 'Normalization', 'cdf')
+%%
+% hist3 will bin the data
+xi = linspace(min(xlag(:,1)), max(xlag(:,2)), 50);
+yi = linspace(min(xlag(:,1)), max(xlag(:,2)), 50);
+hst = hist3(xlag(:,1:2),{xi yi}); %removed extra '
+
+% normalize the histogram data
+dx = xi(2)-xi(1);
+dy = yi(2)-yi(1);
+area = dx*dy;
+pdfData = hst/sum(sum(hst))/area;
+
+% plot pdf
+figure; 
+contour(xi,yi,pdfData);
+
+vector(:,1) = xlag(:,1);
+vector(:,2) = xlag(:,10)
+% hist3 will bin the data
+xi = linspace(min(xlag(:,1)), max(xlag(:,10)), 50);
+yi = linspace(min(xlag(:,1)), max(xlag(:,10)), 50);
+hst = hist3(vector(:,1:2),{xi yi}); %removed extra '
+
+% normalize the histogram data
+dx = xi(2)-xi(1);
+dy = yi(2)-yi(1);
+area = dx*dy;
+pdfData = hst/sum(sum(hst))/area;
+
+% plot pdf
+figure; 
+contour(xi,yi,pdfData);
+
