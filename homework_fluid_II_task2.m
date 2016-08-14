@@ -143,22 +143,41 @@ xlim([0 size(f_atmo_fluc,2)])
 %% Correlation
 %integral length
 timeLags = 12500;
-autocorr_time_lag = (1-1:timeLags)';
-autocorr_data = autocorr(fluc_atmo,timeLags);
+autocorr_time_lag_atmo = (1-1:timeLags)';
+autocorr_time_lag_dataCenter = (1-1:timeLags)';
+autocorr_data_atmo = autocorr(fluc_atmo,timeLags);
+autocorr_data_dataCenter = autocorr(fluc_center,timeLags);
 
 % check fft of autocorr
-autocorr_fft = fft(autocorr_data);
+autocorr_fft_atmo = fft(autocorr_data_atmo);
+autocorr_fft_dataCenter = fft(autocorr_data_dataCenter);
+
 figure
-plot(abs(autocorr_fft(1:length(autocorr_fft)/2+1)));
+plot(abs(autocorr_fft_atmo(1:length(autocorr_fft_atmo)/2+1)));
+figure
+plot(abs(autocorr_fft_dataCenter(1:length(autocorr_fft_dataCenter)/2+1)));
+
 %delete data lower than 0 of the autocorrelation (visually dicided)
 i = 1
-while autocorr_data(i,1) > 0
+while autocorr_data_atmo(i,1) > 0
     i = i + 1
 end
-autocorr_time_lag(i:end) = [];
-autocorr_data(i:end) = [];
+autocorr_time_lag_atmo(i:end) = [];
+autocorr_data_atmo(i:end) = [];
+i = 1
+while autocorr_data_dataCenter(i,1) > 0
+    i = i + 1
+end
+autocorr_time_lag_dataCenter(i:end) = [];
+autocorr_data_dataCenter(i:end) = [];
 figure
-plot(autocorr_data);
+plot(autocorr_data_atmo);
+figure
+plot(autocorr_data_dataCenter);
+%% Taylor and Integral Length
+taylor_hypothesis_factor = 1/Fs_atmo * nanmean(atmosphere); %frozen turbulence; diameter of structure
+
+integral_length = trapz(autocorr_time_lag_atmo,autocorr_data_atmo)*taylor_hypothesis_factor;
 %% Joint probability dist
 xlag = lagmatrix(fluc_atmo,[0 1 2 3 4 5 6 7 8 9 10]);
 
@@ -208,4 +227,6 @@ pdfData = hst/sum(sum(hst))/area;
 % plot pdf
 figure; 
 contour(xi,yi,pdfData);
+
+
 

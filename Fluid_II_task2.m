@@ -61,7 +61,7 @@ autocorr_data = autocorr(data_lab,timeLags);
 autocorr_time_lag(950:end) = [];
 autocorr_data(950:end) = [];
 
-taylor_hypothesis_factor = 1/fq_lab * nanmean(data_lab); %frozen turbulence
+taylor_hypothesis_factor = 1/fq_lab * nanmean(data_lab); %frozen turbulence; diameter of structure
 
 integral_length = trapz(autocorr_time_lag,autocorr_data)*taylor_hypothesis_factor;
 eta_kolmo = ((ny_air^3 * integral_length)/(nanmean(data_lab)^3))^(1/4); 
