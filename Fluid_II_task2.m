@@ -30,8 +30,6 @@ xlabel('f (Hz)')
 ylabel('|P1(f)|')
 P_gerade = 10.^(-5/3 *log10(f)+8.8);
 
-
-
 figure
 loglog(f,PSD)
 hold on
