@@ -1,4 +1,6 @@
 %% 1 basic characteristic
+close all;
+clear all;
 %% 1.1 load data
 atmosphere = load ('AtmosphericData_July_fs10Hz_Kurz.txt');
 dataCenterline = load('Data_Centerline_FractalGrid_fs60kHz.txt');
@@ -58,7 +60,11 @@ for timeInterval = [60 600 6000]
     j = j + 2
     k = k +1
 end
-save('fluctuations.mat','fluc_atmo', 'fluc_center');
+
+% u_dash
+atmosphere_dash = atmosphere - mean_atmosphere;
+dataCenterline_dash = dataCenterline - mean_dataCenterline;
+save('fluctuations.mat','fluc_atmo', 'fluc_center','atmosphere_dash','dataCenterline_dash');
 %% Comparison
 
 %table: mean

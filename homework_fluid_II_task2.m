@@ -139,13 +139,13 @@ ylabel('Power spectral density')
 xlim([0 size(f_atmo_fluc,2)])
 
 %% Statistics
-[x,y] = ksdensity(fluc_atmo);
+%[x,y] = ksdensity(fluc_atmo);
 %% Correlation
 %integral length
 timeLags = 12500;
 autocorr_time_lag_atmo = (1-1:timeLags)';
 autocorr_time_lag_dataCenter = (1-1:timeLags)';
-autocorr_data_atmo = autocorr(fluc_atmo,timeLags);
+autocorr_data_atmo = autocorr(fluc_atmo',timeLags);
 autocorr_data_dataCenter = autocorr(fluc_center,timeLags);
 
 % check fft of autocorr
@@ -227,6 +227,7 @@ pdfData = hst/sum(sum(hst))/area;
 % plot pdf
 figure; 
 contour(xi,yi,pdfData);
+
 
 
 

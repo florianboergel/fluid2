@@ -1,0 +1,15 @@
+Taylor's Hypothesis
+when advecting past a sensor, vortices/turbulence
+patterns change so slowly that they can be
+considered to be frozen while passing the sensor;
+therefore, they are passing by with the mean flow
+velocity!
+
+Length of this structure is defined by r:
+Therefore, the diameter of a structure can be
+calculated with the mean velocity and a time span/
+frequency
+r = mean(u) / f
+
+Integral length, represents the scale from which a time series
+becomes uncorrelated
