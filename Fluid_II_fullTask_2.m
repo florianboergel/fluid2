@@ -3,7 +3,7 @@
 clear all;
 close all;
 atmosphere = load ('AtmosphericData_July_fs10Hz_Kurz.txt');
-dataCenterline = load('Data_Centerline_FractalGrid_fs60kHz.txt');
+dataCenterline = load('jfm_data_block1.txt');
 load('fluctuations.mat');
 %% power spectrum E(f) or E(k)
 Fs_atmo = 10    % sampling frequency atmo
@@ -38,7 +38,7 @@ title('Atmosphere - One sided Amplitude Spectrum of u dash (t)')
 xlabel('f (Hz)')
 ylabel('|p1_atmo(f)|')
 
-Fs_center = 60% sampling frequency dataCenter
+Fs_center = 8000% sampling frequency dataCenter
 
 %   dataCenter u
 length_center = length(dataCenterline);
@@ -193,8 +193,8 @@ end
 
 %% Taylor's hypothesis
 
-r_atmo = nanmean(atmosphere) / Fs_atmo; % diameter of frozen turbulence structure
-r_dataCenter = nanmean(dataCenterline) / Fs_center; % diameter of frozen turbulence structure
+r_atmo = nanmean(atmosphere) * 1/Fs_atmo; % diameter of frozen turbulence structure
+r_dataCenter = nanmean(dataCenterline) * 1/Fs_center; % diameter of frozen turbulence structure
 %% Integral Length
 %   atmo
 timeLags_atmo = length(atmosphere)-1;
@@ -226,12 +226,14 @@ integral_length_dataCenter = trapz(autocorr_time_lag_dataCenter,autocorr_data_da
 %% kolmogorov length
 % atmo
 epsilon_atmo = nanmean(atmosphere).^3 / integral_length_atmo;
-visco_air = 1.5*10^-5;
+visco_air = 1.42*10^-5;
 kolmogorov_length_atmo = (visco_air^3/epsilon_atmo)^(1/4);
 % dataCenter
 epsilon_dataCenter = nanmean(dataCenterline).^3 / integral_length_dataCenter;
-visco_air = 1.5*10^-5;
+visco_air = 1.42*10^-5;
 kolmogorov_length_dataCenter = (visco_air^3/epsilon_dataCenter)^(1/4);
+%% Taylor Length
+taylor_length_center = 15*visco_air*nanmean(dataCenterline-nanmean(dataCenterline).^2/epsilon_dataCenter);
 %% Velocity increments for r = 2^m for m = 1-8
 lag_array = [2^1,2^2,2^3,2^4,2^5,2^6,2^7,2^8];
 % atmo
@@ -243,7 +245,7 @@ for i = 2:length(lag_increments_atmo(1,:))
     increments_atmo(:,count) = lag_increments_atmo(:,i) - lag_increments_atmo(:,1);
     count = count + 1
 end
-increments_atmo_space = increments_atmo * r_atmo;
+r_lag_atmo = lag_array * r_atmo;
 % dataCenter
 lag_increments_center = lagmatrix(dataCenterline(:,1),[0,2^1,2^2,2^3,2^4,2^5,2^6,2^7,2^8]);
 
@@ -253,7 +255,7 @@ for i = 2:length(lag_increments_center(1,:))
     increments_center(:,count) = lag_increments_center(:,i) - lag_increments_center(:,1);
     count = count + 1
 end
-increments_center_space = increments_center * r_dataCenter;
+r_lag_center = lag_array * r_dataCenter;
 %% determine structure function <u_r^2>
 % atmo
 structure_function_square_atmo = nanmean(increments_atmo.^2);
@@ -263,23 +265,32 @@ structure_function_square_center = nanmean(increments_center.^2);
 n = [1,2,3,4,5,6]
 % atmo
 for i = n 
-    structure_function_atmo(:,i) = nanmean(increments_atmo.^i);
+    structure_function_atmo(:,i) = abs(nanmean(increments_atmo.^i));
 end
 % dataCenter
 for i = n 
-    structure_function_center(:,i) = nanmean(increments_center.^i);
+    structure_function_center(:,i) = abs(nanmean(increments_center.^i));
 end  
+%% Taylor Length Function
+taylor_length_function_atmo = nanmean(atmosphere.^2)./structure_function_square_atmo .*  r_lag_atmo.^2;
+taylor_length_function_center = nanmean(dataCenterline.^2)./structure_function_square_center .*  r_lag_center.^2;
+
+figure
+scatter(r_lag_atmo,taylor_length_function_atmo)
+title('Taylor length function')
+xlabel('r [m]')
+ylabel('lamda^2 [m^2]')
 %% Plot of structure functions
 % atmo
 ylim_atmo = max(structure_function_atmo(:))
-x_pos = integral_length_atmo/r_atmo;
+x_pos = integral_length_atmo;
 figure
-%plot([x_pos x_pos], [0 ylim]);
-hold on
 for i = 1:length(structure_function_atmo(1,:))
-    loglog(lag_array,abs(structure_function_atmo(:,i)),'-s');
+    loglog(r_lag_atmo,abs(structure_function_atmo(:,i)),'-s');
+    hold on
     grid on
 end
+loglog([x_pos x_pos], [0.00001 ylim_atmo]);
 hold off
 title('Structure functions  of atmosphere')
 xlabel('Lags [m]')
@@ -288,13 +299,14 @@ ylabel('Stucturefunctions u(r,n)')
 figure
 ylim_center = max((abs(structure_function_center(:))))
 x_pos_center = integral_length_dataCenter;
+x_pos_kolmo_center = kolmogorov_length_dataCenter;
 for i = 1:length(structure_function_center(1,:))
-    loglog(lag_array,abs(structure_function_center(:,i)),'-s');
+    loglog(r_lag_center,abs(structure_function_center(:,i)),'-s');
     hold on
     grid on
 end
 loglog([x_pos_center x_pos_center], [0.000001 ylim_center]);
-ylim([0.000001,ylim_center])
+loglog([x_pos_kolmo_center x_pos_kolmo_center], [0.000001 ylim_center]);
 hold off
 title('Structure functions  of dataCenter')
 xlabel('Lags [m]')
@@ -302,14 +314,14 @@ ylabel('Stucturefunctions u(r,n)')
 
 %% PDF of increments
 %   atmo
-for i = 1:length(increments_atmo_space(1,:))
-    [hist_y, hist_x] = hist(increments_atmo_space(:,i),50);
+for i = 1:length(increments_atmo(1,:))
+    [hist_y, hist_x] = hist(increments_atmo(:,i),50);
     hist_y = hist_y/sum(hist_y);
     hist_y_array(:,i) = hist_y;
     hist_x_array(:,i) = hist_x;   
 end
 figure
-for i = 1:length(increments_atmo_space(1,:))
+for i = 1:length(increments_atmo(1,:))
     hold on
     semilogy(hist_x_array(:,i),hist_y_array(:,i))  
     set(gca,'yscale','log')
@@ -319,14 +331,14 @@ title('PDF u increment of atmosphere')
 xlabel('Fluctuation U_r [m/s]')
 ylabel('Probability Density P(U_r) [1]')
 % dataCenter
-for i = 1:length(increments_center_space(1,:))
-    [hist_y, hist_x] = hist(increments_center_space(:,i),50);
+for i = 1:length(increments_center(1,:))
+    [hist_y, hist_x] = hist(increments_center(:,i),50);
     hist_y = hist_y/sum(hist_y);
     hist_y_array_center(:,i) = hist_y;
     hist_x_array_center(:,i) = hist_x;   
 end
 figure
-for i = 1:length(increments_center_space(1,:))
+for i = 1:length(increments_center(1,:))
     hold on
     semilogy(hist_x_array_center(:,i),hist_y_array_center(:,i))  
     set(gca,'yscale','log')
@@ -336,3 +348,37 @@ title('PDF u increment of dataCenter')
 xlabel('Fluctuation U_r [m/s]')
 ylabel('Probability Density P(U_r) [1]')
 %% Estimate scaling exponents
+% at LAG 3 % LN BENUTZEN!!!
+for i = 1:length(structure_function_center(1,:))
+    slope_center(i) = (log10(structure_function_center(end,i))-log10(structure_function_center(4,i)))/(log10(r_lag_center(end))-log10(r_lag_center(4)));
+    kolmo41_slope_center(i) = i/3*log10(epsilon_dataCenter);
+    kolmo62_slope_center(i) = i/3 - 0.004*(i*(i-3))/18
+end
+
+for i = 1:length(structure_function_atmo(1,:))
+    slope_atmo(i) = (log10(structure_function_atmo(end,i))-log10(structure_function_atmo(4,i)))/(log10(r_lag_atmo(end))-log10(r_lag_atmo(4)));
+    kolmo41_slope_atmo(i) = i/3*log10(epsilon_atmo);
+    kolmo62_slope_atmo(i) = i/3 - 0.004*(i*(i-3))/18
+end
+
+figure
+plot(slope_center)
+hold on
+plot(kolmo41_slope_center)
+plot(kolmo62_slope_center)
+hold off
+title('Scaling Exponents Function of dataSet')
+xlabel('Exponent n')
+ylabel('Scaling Exponents')
+legend('Scaling Exponents', 'Kol41 Scaling', 'Kol62 Scaling')
+
+figure
+plot(slope_atmo)
+hold on
+plot(kolmo41_slope_atmo)
+plot(kolmo62_slope_atmo)
+hold off
+title('Scaling Exponents Function of atmosphere')
+xlabel('Exponent n')
+ylabel('Scaling Exponents')
+legend('Scaling Exponents', 'Kol41 Scaling', 'Kol62 Scaling')

@@ -3,7 +3,7 @@ close all;
 clear all;
 %% 1.1 load data
 atmosphere = load ('AtmosphericData_July_fs10Hz_Kurz.txt');
-dataCenterline = load('Data_Centerline_FractalGrid_fs60kHz.txt');
+dataCenterline = load('jfm_data_block1.txt');
 %%
 timeInterval = 60;
 
