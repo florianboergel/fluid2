@@ -1,0 +1,45 @@
+\begin{thebibliography}{}
+
+\bibitem[Benzi et~al., 1992]{benzi}
+Benzi, R., Ciliberto, S., Tripiccione, R., Baudet, C., Massaioli, F., , and
+  Succi, S. (1992).
+\newblock Extended self-similarity in turbulent flows.
+\newblock Technical report.
+
+\bibitem[Chatfiled, 1989]{chatfield}
+Chatfiled, C. (1989).
+\newblock The analysis of timeseries — an introduction.
+\newblock Technical report.
+
+\bibitem[Cushman-Roisin, 2014]{cushman}
+Cushman-Roisin, B. (2014).
+\newblock Enviromental fluid mechanics.
+\newblock Technical report.
+
+\bibitem[Morales et~al., 2010]{peinke2}
+Morales, A., Wächter, M., and J., P. (2010).
+\newblock Characterization of wind turbulence by higher-order statistics.
+\newblock Technical report.
+
+\bibitem[Peinke, 2016]{peinke}
+Peinke, J. (2016).
+\newblock Fluid dynamics and turbulence.
+\newblock Technical report.
+
+\bibitem[Peinke and Neunaber, 2016]{tutorial}
+Peinke, J. and Neunaber, J. (2016).
+\newblock Tutorial, fluid dynamics ii.
+\newblock Technical report.
+
+\bibitem[Renner et~al., 2000]{markov}
+Renner, C., Peinke, J., and Friedrich, R. (2000).
+\newblock Experimental indications for markov properties of small-scale
+  turbulence.
+\newblock Technical report.
+
+\bibitem[Stressing and Peinke, 2012]{npoint}
+Stressing, R. and Peinke, J. (2012).
+\newblock Towards a stochastic multi-point description of turbulence.
+\newblock Technical report.
+
+\end{thebibliography}
